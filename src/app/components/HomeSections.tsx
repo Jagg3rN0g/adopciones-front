@@ -76,6 +76,7 @@ function SectionCarousel({ images, alt }: { images: string[]; alt: string }) {
                     alt={alt}
                     fill
                     className="object-cover"
+                    unoptimized
                 />
             </div>
         );
@@ -97,6 +98,7 @@ function SectionCarousel({ images, alt }: { images: string[]; alt: string }) {
                     className={`object-cover transition-all duration-700 ease-in-out ${isTransitioning ? 'opacity-0 scale-105' : 'opacity-100 scale-100'
                         }`}
                     priority={index === 0}
+                    unoptimized
                 />
             </div>
 

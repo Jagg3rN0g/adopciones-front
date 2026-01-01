@@ -180,6 +180,7 @@ export default function AnimalCard({ animal }: { animal: Animal }) {
                         className="object-cover group-hover:scale-105 transition"
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         priority={currentIdx === 0}
+                        unoptimized
                     />
                     {gallery.length > 1 && (
                         <>
@@ -316,6 +317,7 @@ export default function AnimalCard({ animal }: { animal: Animal }) {
                                 sizes="(max-width: 768px) 92vw, 650px"
                                 priority={true}
                                 style={{ background: "#181818" }}
+                                unoptimized
                             />
                             {gallery.length > 1 && (
                                 <>

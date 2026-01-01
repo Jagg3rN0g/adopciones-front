@@ -92,6 +92,7 @@ export function AdoptionForm({
                     className="h-16 w-20 rounded-lg object-cover ring-1 ring-zinc-200 dark:ring-zinc-800"
                     width={80}
                     height={80}
+                    unoptimized
                 />
                 <div>
                     <h2 className="text-xl font-semibold leading-tight" style={{ color: CASI_NEGRO }}>Formulario de adopción</h2>

@@ -27,6 +27,7 @@ function ImgWithFallback({ src, alt, className }: { src?: string | null; alt: st
             className={className}
             onError={() => setFallbackSrc("/placeholders/placeholder.jpg")}
             loading="lazy"
+            unoptimized
         />
     );
 }
