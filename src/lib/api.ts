@@ -7,9 +7,12 @@ export const api = axios.create({
 
 
 // Opcional: auth token / logging
+import { useAuthStore } from '@/app/store/auth.store';
+
 api.interceptors.request.use((config) => {
     // const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-    // if (token) config.headers.Authorization = `Bearer ${token}`;
+    const { token } = useAuthStore.getState();
+    if (token) config.headers.Authorization = `Bearer ${token}`;
     if (process.env.NODE_ENV !== 'production') {
         // eslint-disable-next-line no-console
         console.log(`[REQ] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);

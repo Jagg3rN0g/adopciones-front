@@ -7,13 +7,15 @@ import FAQsManager from "./Components/FAQsManager";
 import { api } from "@/lib/api";
 // import router from "next/router";
 import Swal from "sweetalert2";
-import { VERDE_PRINCIPAL, VERDE_ACENTO, CASI_NEGRO, BLANCO_HUESO } from "@/Constants/colors";
+import { VERDE_PRINCIPAL, CASI_NEGRO, BLANCO_HUESO } from "@/Constants/colors";
+import { useAuthStore } from "../store/auth.store";
 
 const LOCK_DURATION_MS = 5 * 60 * 1000; // 5 minutes
 const LOCK_KEY = "admin_lock_until";
 const ATTEMPTS_KEY = "admin_bad_attempts";
 
 export default function AdminPage() {
+    const { login: storeLogin, isAuthenticated: storeIsAuthenticated } = useAuthStore();
     const [sk, setSk] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -36,10 +38,11 @@ export default function AdminPage() {
     });
     const [now, setNow] = useState(Date.now());
     const [loading, setLoading] = useState(false);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    // const [isAuthenticated, setIsAuthenticated] = useState(false); // Removed local state
+    const isAuthenticated = storeIsAuthenticated(); // Use store state
     const [activeTab, setActiveTab] = useState<'animals' | 'sections' | 'faqs'>('animals');
 
-    // Sync localStorage on mount in case localStorage was changed externally while the component was not mounted
+    // Sync localStorage on mount
     useEffect(() => {
         if (typeof window !== "undefined") {
             const storedAttempts = localStorage.getItem(ATTEMPTS_KEY);
@@ -67,14 +70,14 @@ export default function AdminPage() {
         }
     }, [lockedUntil]);
 
-    // Update now to trigger rerenders and check if lockout expired
+    // Update now
     useEffect(() => {
         if (!lockedUntil) return;
         const interval = setInterval(() => setNow(Date.now()), 1000);
         return () => clearInterval(interval);
     }, [lockedUntil]);
 
-    // If lockout expires, reset attempts and remove lock value from localStorage
+    // Lockout expiry
     useEffect(() => {
         if (lockedUntil && now >= lockedUntil) {
             setBadAttempts(0);
@@ -90,7 +93,7 @@ export default function AdminPage() {
     const isLocked = !!lockedUntil && now < lockedUntil;
 
     /**
-     * Login function now returns boolean for auth result.
+     * Login function
      */
     const login = async (
         sk: string,
@@ -99,16 +102,18 @@ export default function AdminPage() {
     ): Promise<boolean> => {
         try {
             const resp = await api.post("/users/login", { sk, email, password });
-            if (resp.status === 200) {
+            if (resp.status === 200 && resp.data.success) {
+                const { access_token, ...userData } = resp.data.data;
+                storeLogin(access_token, userData);
+
                 Swal.fire({
                     title: "Login successful",
                     text: "You are now logged in.",
                     icon: "success",
                 });
-                // localStorage.setItem("token", resp.data.token);
-                // router.push("/admin");
                 return true;
             } else {
+                console.error("Login failed response:", resp);
                 Swal.fire({
                     title: "Login failed",
                     text: "Invalid credentials. Please try again.",
@@ -117,6 +122,7 @@ export default function AdminPage() {
                 return false;
             }
         } catch (err) {
+            console.error("Login error:", err);
             Swal.fire({
                 title: "Login failed",
                 text: "Invalid credentials. Please try again.",
@@ -160,7 +166,7 @@ export default function AdminPage() {
         setBadAttempts(0);
         setLockedUntil(null);
         setError(null);
-        setIsAuthenticated(true);
+        // setIsAuthenticated(true); // Handled by store
         if (typeof window !== "undefined") {
             localStorage.removeItem(ATTEMPTS_KEY);
             localStorage.removeItem(LOCK_KEY);
@@ -178,7 +184,9 @@ export default function AdminPage() {
     };
 
     const handleLogout = () => {
-        setIsAuthenticated(false);
+        // setIsAuthenticated(false);
+        const { logout } = useAuthStore.getState();
+        logout();
         setSk('');
         setEmail('');
         setPassword('');

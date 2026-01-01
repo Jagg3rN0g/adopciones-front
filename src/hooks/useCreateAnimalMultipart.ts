@@ -21,8 +21,22 @@ export function useCreateAnimalMultipart(): Result {
         setData(null);
 
         const base = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000';
+
+        // Obtenemos el token del store
+        // Nota: para usar el hook dentro de una función, mejor acceder a getState, 
+        // pero este hook es un componente funcional, así que podríamos usar useAuthStore().token
+        // Sin embargo, para evitar re-renders innecesarios o problemas de closure, 
+        // getState() es seguro en callbacks.
+        const { token } = await import('@/app/store/auth.store').then(m => m.useAuthStore.getState());
+
+        const headers: HeadersInit = {};
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const res = await fetch(`${base}/animals`, {
             method: 'POST',
+            headers,
             body: fd,
         });
 
